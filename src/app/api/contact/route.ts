@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 
 // Simple in-memory rate limiting (for serverless, use Vercel KV or Redis in production)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -9,11 +9,11 @@ function rateLimit(ip: string): boolean {
     const limit = rateLimitMap.get(ip);
 
     if (!limit || now > limit.resetTime) {
-        rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 }); // 1 minute window
+        rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
         return true;
     }
 
-    if (limit.count >= 3) { // Max 3 requests per minute
+    if (limit.count >= 3) {
         return false;
     }
 
@@ -24,8 +24,8 @@ function rateLimit(ip: string): boolean {
 function sanitizeInput(input: string): string {
     return input
         .trim()
-        .replace(/[<>]/g, '') // Remove potential HTML tags
-        .substring(0, 5000); // Hard limit
+        .replace(/[<>]/g, '')
+        .substring(0, 5000);
 }
 
 function isValidEmail(email: string): boolean {
@@ -35,16 +35,14 @@ function isValidEmail(email: string): boolean {
 
 export async function POST(request: Request) {
     try {
-        // 1. Environment variable check (fail fast)
-        if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.CONTACT_EMAIL) {
-            console.error('[CRITICAL] SMTP environment variables not configured');
+        if (!process.env.RESEND_API_KEY || !process.env.CONTACT_EMAIL) {
+            console.error('[CRITICAL] Resend API key or contact email not configured');
             return NextResponse.json(
                 { error: "Service temporarily unavailable" },
                 { status: 503 }
             );
         }
 
-        // 2. Rate limiting
         const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
         if (!rateLimit(ip)) {
             return NextResponse.json(
@@ -56,14 +54,11 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, email, message, company, reason, honeypot } = body;
 
-        // 3. Honeypot check (silent drop for bots)
         if (honeypot) {
             console.log('[SECURITY] Honeypot triggered from IP:', ip);
-            // Return success to bot but don't send email
             return NextResponse.json({ success: true }, { status: 200 });
         }
 
-        // 4. Required field validation
         if (!name || !email || !message || !reason) {
             return NextResponse.json(
                 { error: "All fields are required" },
@@ -71,10 +66,16 @@ export async function POST(request: Request) {
             );
         }
 
-        // 5. Length validation
         if (name.length > 100) {
             return NextResponse.json(
                 { error: "Name is too long (max 100 characters)" },
+                { status: 400 }
+            );
+        }
+
+        if (!isValidEmail(email)) {
+            return NextResponse.json(
+                { error: "Invalid email format" },
                 { status: 400 }
             );
         }
@@ -86,46 +87,19 @@ export async function POST(request: Request) {
             );
         }
 
-        if (company && company.length > 100) {
-            return NextResponse.json(
-                { error: "Company name is too long (max 100 characters)" },
-                { status: 400 }
-            );
-        }
-
-        // 6. Email validation
-        if (!isValidEmail(email)) {
-            return NextResponse.json(
-                { error: "Invalid email format" },
-                { status: 400 }
-            );
-        }
-
-        // 7. Sanitize inputs
         const sanitizedName = sanitizeInput(name);
         const sanitizedEmail = sanitizeInput(email);
         const sanitizedMessage = sanitizeInput(message);
         const sanitizedCompany = company ? sanitizeInput(company) : '';
         const sanitizedReason = sanitizeInput(reason);
 
-        // 8. Configure Transporter
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        });
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-        // 9. Send Mail
-        await transporter.sendMail({
-            from: `"${sanitizedName}" <${process.env.SMTP_USER}>`,
-            replyTo: sanitizedEmail,
+        await resend.emails.send({
+            from: 'Portfolio Contact <onboarding@resend.dev>',
             to: process.env.CONTACT_EMAIL,
+            replyTo: sanitizedEmail,
             subject: `[Portfolio] ${sanitizedReason} - ${sanitizedName}`,
-            text: `Name: ${sanitizedName}\nEmail: ${sanitizedEmail}\nCompany: ${sanitizedCompany || 'N/A'}\nReason: ${sanitizedReason}\n\nMessage:\n${sanitizedMessage}`,
             html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px;">
           <h2 style="color: #000; border-bottom: 2px solid #000; padding-bottom: 10px;">New Portfolio Inquiry</h2>
@@ -147,7 +121,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (error) {
-        // 10. Error logging without stack trace exposure
         console.error("[API ERROR] Contact form submission failed:", error instanceof Error ? error.message : 'Unknown error');
         return NextResponse.json(
             { error: "Failed to send message. Please try again later." },
