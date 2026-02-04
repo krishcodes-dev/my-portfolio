@@ -21,9 +21,9 @@ export default function OrbitalHero() {
     return (
         // Increased size to prevent canvas clipping
         <div
-            className="relative w-[1600px] h-[800px] flex items-center justify-center fade-in"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className={`relative w-[1600px] h-[800px] flex items-center justify-center fade-in ${isMobile ? 'pointer-events-none' : ''}`}
+            onMouseEnter={() => !isMobile && setIsHovered(true)}
+            onMouseLeave={() => !isMobile && setIsHovered(false)}
         >
             {/* 
             LAYER 0: Atmosphere

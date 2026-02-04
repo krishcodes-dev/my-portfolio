@@ -163,7 +163,7 @@ export default function Contact() {
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="krishsanghavi09@gmail.com"
+                                placeholder="[EMAIL_ADDRESS]"
                                 maxLength={254}
                                 className={inputClasses(!!errors.email)}
                                 onChange={() => errors.email && setErrors(prev => ({ ...prev, email: '' }))}
