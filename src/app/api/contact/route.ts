@@ -95,28 +95,51 @@ export async function POST(request: Request) {
 
         const resend = new Resend(process.env.RESEND_API_KEY);
 
-        await resend.emails.send({
-            from: 'Krish Sanghavi <contact@krishcodes.dev>',
-            to: process.env.CONTACT_EMAIL,
-            replyTo: sanitizedEmail,
-            subject: `[Portfolio] ${sanitizedReason} - ${sanitizedName}`,
-            html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px;">
-          <h2 style="color: #000; border-bottom: 2px solid #000; padding-bottom: 10px;">New Portfolio Inquiry</h2>
-          
-          <div style="margin-bottom: 20px;">
-            <p style="margin: 5px 0;"><strong>Name:</strong> ${sanitizedName}</p>
-            <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${sanitizedEmail}">${sanitizedEmail}</a></p>
-            <p style="margin: 5px 0;"><strong>Company:</strong> ${sanitizedCompany || '<span style="color: #999;">Not specified</span>'}</p>
-            <p style="margin: 5px 0;"><strong>Reason:</strong> <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">${sanitizedReason}</span></p>
-          </div>
-
-          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #000;">
-            <p style="margin: 0; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${sanitizedMessage.replace(/\n/g, '<br>')}</p>
-          </div>
-        </div>
-      `,
+        const submittedAt = new Date().toLocaleString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
         });
+
+        const submissionId = `INQ-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+        const { adminEmail } = await import('@/emails/contact-admin');
+        const { confirmationEmail } = await import('@/emails/contact-confirmation');
+
+        const adminEmailData = adminEmail({
+            name: sanitizedName,
+            email: sanitizedEmail,
+            company: sanitizedCompany,
+            reason: sanitizedReason,
+            message: sanitizedMessage,
+            submittedAt,
+            submissionId
+        });
+
+        const confirmationEmailData = confirmationEmail({
+            name: sanitizedName,
+            email: sanitizedEmail
+        });
+
+        await Promise.all([
+            resend.emails.send({
+                from: 'Krish Sanghavi <contact@krishcodes.dev>',
+                to: process.env.CONTACT_EMAIL!,
+                replyTo: sanitizedEmail,
+                subject: adminEmailData.subject,
+                html: adminEmailData.html,
+            }),
+            resend.emails.send({
+                from: 'Krish Sanghavi <contact@krishcodes.dev>',
+                to: sanitizedEmail,
+                subject: confirmationEmailData.subject,
+                html: confirmationEmailData.html,
+            })
+        ]);
 
         return NextResponse.json({ success: true }, { status: 200 });
 

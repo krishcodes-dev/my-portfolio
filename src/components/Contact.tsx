@@ -38,7 +38,8 @@ export default function Contact() {
         e.preventDefault();
         setErrors({});
 
-        const formData = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
         const validationErrors = validateForm(formData);
 
         if (Object.keys(validationErrors).length > 0) {
@@ -64,12 +65,13 @@ export default function Contact() {
 
             setStatus("success");
             setSelectedReason("");
-            e.currentTarget.reset();
+            if (form) {
+                form.reset();
+            }
             setTimeout(() => setStatus("idle"), 5000);
         } catch (error) {
             console.error("Contact form error:", error);
             setStatus("error");
-            // Show error for 8 seconds to ensure user sees it
             setTimeout(() => setStatus("idle"), 8000);
         }
     }
@@ -163,7 +165,7 @@ export default function Contact() {
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="[EMAIL_ADDRESS]"
+                                placeholder="contact@krish.dev"
                                 maxLength={254}
                                 className={inputClasses(!!errors.email)}
                                 onChange={() => errors.email && setErrors(prev => ({ ...prev, email: '' }))}

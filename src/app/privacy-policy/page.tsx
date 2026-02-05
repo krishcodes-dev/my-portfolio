@@ -28,11 +28,11 @@ export default function PrivacyPolicy() {
                 <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Privacy Policy</h1>
                 <p style={{ color: '#666', marginBottom: '30px' }}>Last updated: February 4, 2026</p>
 
-                <p>This Privacy Policy explains how information is collected, used, and protected when you visit krishsanghavi.dev (the "Website").</p>
+                <p>This Privacy Policy explains how information is collected, used, and protected when you visit krishcodes.dev (the "Website").</p>
 
                 <h2 style={{ fontSize: '24px', marginTop: '30px', marginBottom: '15px' }}>Definitions and Key Terms</h2>
                 <ul>
-                    <li><strong>Website</strong> refers to krishsanghavi.dev</li>
+                    <li><strong>Website</strong> refers to krishcodes.dev</li>
                     <li><strong>User</strong> refers to anyone visiting or contacting through the Website</li>
                     <li><strong>Personal Data</strong> refers to information you voluntarily provide (name, email, message)</li>
                 </ul>

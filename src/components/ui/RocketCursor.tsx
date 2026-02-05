@@ -22,8 +22,8 @@ export function RocketCursor() {
     const cursorX = useMotionValue(0);
     const cursorY = useMotionValue(0);
 
-    const rocketX = useSpring(cursorX, { damping: 30, stiffness: 400, mass: 0.3 });
-    const rocketY = useSpring(cursorY, { damping: 30, stiffness: 400, mass: 0.3 });
+    const rocketX = useSpring(cursorX, { damping: 25, stiffness: 300, mass: 0.5 });
+    const rocketY = useSpring(cursorY, { damping: 25, stiffness: 300, mass: 0.5 });
 
     const particles = useRef<any[]>([]);
     const lastPos = useRef({ x: -100, y: -100 });
