@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/styles/cursor.css";
 import SmoothScroll from "@/components/providers/smooth-scroll";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({
             {children}
           </SmoothScroll>
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   );
