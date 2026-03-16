@@ -4,7 +4,7 @@ export default function PrivacyPolicy() {
             {/* Fixed back link */}
             <a
                 href="/"
-                className="fixed top-6 left-6 z-50 flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors duration-200 group"
+                className="fixed top-4 left-4 z-50 flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors duration-200 group bg-neutral-950/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10"
             >
                 <svg
                     className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5"

@@ -66,14 +66,13 @@ function RadarChart() {
                     })}
 
                     <motion.polygon
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
                         transition={{ duration: 1, ease: "easeOut" }}
                         points={dataPoints}
                         fill="rgba(59, 130, 246, 0.15)"
                         stroke="rgba(59, 130, 246, 0.8)"
                         strokeWidth="1.5"
-                        style={{ transformOrigin: "center" }}
                     />
 
                     {skills.map((skill, i) => {

@@ -1,11 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export default function Navigation() {
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("");
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -140,24 +141,53 @@ export default function Navigation() {
                 Krish Sanghavi
             </button>
 
-            {/* Right: Navigation Links */}
-            <div className="flex items-center gap-4 md:gap-8">
+            {/* Desktop nav links */}
+            <div className="hidden md:flex items-center gap-8">
                 {navLinks.map((link) => (
                     <button
                         key={link.name}
                         onClick={() => scrollToSection(link.id)}
-                        className={`relative group text-xs md:text-base transition-colors capitalize py-2 px-1 touch-manipulation ${activeSection === link.id ? "text-white" : "text-neutral-400 hover:text-white"
-                            }`}
-                        style={{ minWidth: '44px', minHeight: '44px' }}
+                        className={`relative group text-base transition-colors capitalize py-2 px-1 ${activeSection === link.id ? "text-white" : "text-neutral-400 hover:text-white"}`}
                     >
                         {link.name}
-                        <span
-                            className={`absolute -bottom-1 left-0 h-px bg-white transition-all duration-300 ${activeSection === link.id ? "w-full" : "w-0 group-hover:w-full"
-                                }`}
-                        />
+                        <span className={`absolute -bottom-1 left-0 h-px bg-white transition-all duration-300 ${activeSection === link.id ? "w-full" : "w-0 group-hover:w-full"}`} />
                     </button>
                 ))}
             </div>
+
+            {/* Mobile hamburger */}
+            <button
+                className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px] z-50"
+                onClick={() => setMenuOpen(prev => !prev)}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+            >
+                <span className={`block w-5 h-px bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[6px]" : ""}`} />
+                <span className={`block w-5 h-px bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+                <span className={`block w-5 h-px bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[6px]" : ""}`} />
+            </button>
+
+            {/* Mobile menu overlay */}
+            <AnimatePresence>
+                {menuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2 }}
+                        className="md:hidden fixed inset-x-0 top-[56px] bg-neutral-950/95 backdrop-blur-md border-b border-white/10 flex flex-col items-center py-6 gap-6 z-40"
+                    >
+                        {navLinks.map((link) => (
+                            <button
+                                key={link.name}
+                                onClick={() => { scrollToSection(link.id); setMenuOpen(false); }}
+                                className={`text-lg font-medium transition-colors ${activeSection === link.id ? "text-white" : "text-neutral-400"}`}
+                            >
+                                {link.name}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.nav>
     );
 }
