@@ -1,32 +1,23 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
+import About from "@/components/About";
 import Projects from "@/components/Projects";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import OrbitalSystem from "@/components/OrbitalSystem";
-import FixedBackgroundCanvas from "@/components/orbital/FixedBackgroundCanvas";
-import { TechInfoPanel } from "@/components/ui/TechInfoPanel";
-import { TechStackTitle } from "@/components/ui/TechStackTitle";
-import { TechIconsOverlay } from "@/components/ui/TechIconsOverlay";
-
-import { StarBackground } from "@/components/canvas/StarBackground";
-import { RocketCursor } from "@/components/ui/RocketCursor";
+import ClientCanvas from "@/components/ClientCanvas";
+import DynamicOrbitalSystem from "@/components/orbital/DynamicOrbitalSystem";
 
 export default function Home() {
   return (
     <main className="w-full relative">
       <Navigation />
-      <RocketCursor />
-      <StarBackground />
-      <FixedBackgroundCanvas />
+      <ClientCanvas />
       <Hero />
-      <OrbitalSystem />
+      <DynamicOrbitalSystem />
       <Projects />
+      <About />
       <Contact />
       <Footer />
-      <TechStackTitle />
-      <TechInfoPanel />
-      <TechIconsOverlay />
     </main>
   );
 }

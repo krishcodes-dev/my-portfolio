@@ -23,7 +23,7 @@ const item = {
 
 export default function Hero() {
     return (
-        <section className="min-h-screen w-full flex items-center justify-center px-6 lg:px-24 relative overflow-hidden pt-20 md:pt-0">
+        <section id="overview" className="min-h-screen w-full flex items-center justify-center px-6 lg:px-24 relative overflow-hidden pt-20 md:pt-0">
             <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[100px] pointer-events-none" />
 
@@ -36,7 +36,7 @@ export default function Hero() {
                     </motion.div>
 
                     <motion.p variants={item} className="text-lg sm:text-xl md:text-2xl text-neutral-400 font-light max-w-md leading-relaxed">
-                        Full-Stack Developer with AI/ML & Embedded Systems Experience
+                        I build things that think, things that connect, and everything in between.
                     </motion.p>
 
                     <motion.div variants={item} className="flex flex-wrap gap-4">

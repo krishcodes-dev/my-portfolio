@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -16,14 +17,12 @@ export default function Footer() {
                 >
                     <span>© {currentYear} Krish Sanghavi. All rights reserved.</span>
                     <span className="text-neutral-700">|</span>
-                    <a
+                    <Link
                         href="/privacy-policy"
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="hover:text-white transition-colors underline"
                     >
                         Privacy Policy
-                    </a>
+                    </Link>
                 </motion.div>
 
                 <div className="flex gap-6">

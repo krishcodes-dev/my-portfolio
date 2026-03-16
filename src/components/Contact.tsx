@@ -8,7 +8,10 @@ export default function Contact() {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [selectedReason, setSelectedReason] = useState<string>("");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [focusedOptionIndex, setFocusedOptionIndex] = useState(-1);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
     const validateForm = (formData: FormData) => {
         const newErrors: { [key: string]: string } = {};
@@ -108,11 +111,71 @@ export default function Contact() {
         { value: "Just Saying Hi", label: "Just Saying Hi 👋🏻" },
     ];
 
+    const openDropdown = () => {
+        setIsDropdownOpen(true);
+        const selectedIndex = reasonOptions.findIndex(o => o.value === selectedReason);
+        setFocusedOptionIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    };
+
+    const closeDropdown = () => {
+        setIsDropdownOpen(false);
+        setFocusedOptionIndex(-1);
+    };
+
+    const selectOption = (value: string) => {
+        setSelectedReason(value);
+        closeDropdown();
+        if (errors.reason) setErrors(prev => ({ ...prev, reason: '' }));
+        triggerRef.current?.focus();
+    };
+
+    // Keyboard navigation
+    const handleTriggerKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openDropdown();
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    };
+
+    const handleOptionKeyDown = (e: React.KeyboardEvent, index: number) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = Math.min(index + 1, reasonOptions.length - 1);
+            setFocusedOptionIndex(next);
+            optionRefs.current[next]?.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (index === 0) {
+                closeDropdown();
+                triggerRef.current?.focus();
+            } else {
+                const prev = index - 1;
+                setFocusedOptionIndex(prev);
+                optionRefs.current[prev]?.focus();
+            }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectOption(reasonOptions[index].value);
+        } else if (e.key === 'Escape' || e.key === 'Tab') {
+            closeDropdown();
+            triggerRef.current?.focus();
+        }
+    };
+
+    // Focus first option when dropdown opens
+    useEffect(() => {
+        if (isDropdownOpen && focusedOptionIndex >= 0) {
+            optionRefs.current[focusedOptionIndex]?.focus();
+        }
+    }, [isDropdownOpen, focusedOptionIndex]);
+
     // Close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsDropdownOpen(false);
+                closeDropdown();
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -192,16 +255,29 @@ export default function Contact() {
 
                         {/* Reason Dropdown - Custom */}
                         <div className="relative group" ref={dropdownRef}>
-                            <label htmlFor="reason" className={labelClasses}>Reason for reaching out</label>
+                            <label id="reason-label" htmlFor="reason-button" className={labelClasses}>Reason for reaching out</label>
                             <input type="hidden" name="reason" value={selectedReason} />
 
                             {/* Dropdown Trigger */}
                             <button
+                                ref={triggerRef}
+                                id="reason-button"
                                 type="button"
+                                role="combobox"
+                                aria-haspopup="listbox"
+                                aria-expanded={isDropdownOpen}
+                                aria-controls="reason-listbox"
+                                aria-labelledby="reason-label"
+                                aria-activedescendant={isDropdownOpen && focusedOptionIndex >= 0 ? `reason-option-${focusedOptionIndex}` : undefined}
                                 onClick={() => {
-                                    setIsDropdownOpen(!isDropdownOpen);
-                                    if (errors.reason) setErrors(prev => ({ ...prev, reason: '' }));
+                                    if (isDropdownOpen) {
+                                        closeDropdown();
+                                    } else {
+                                        openDropdown();
+                                        if (errors.reason) setErrors(prev => ({ ...prev, reason: '' }));
+                                    }
                                 }}
+                                onKeyDown={handleTriggerKeyDown}
                                 className={`${inputClasses(!!errors.reason)} w-full text-left flex items-center justify-between cursor-pointer`}
                             >
                                 <span className={selectedReason ? "text-white" : "text-neutral-700"}>
@@ -224,22 +300,26 @@ export default function Contact() {
                             <AnimatePresence>
                                 {isDropdownOpen && (
                                     <motion.div
+                                        id="reason-listbox"
+                                        role="listbox"
+                                        aria-label="Reason for reaching out"
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
                                         className="absolute left-0 right-0 top-full mt-2 bg-neutral-900/95 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden z-50 shadow-xl"
                                     >
-                                        {reasonOptions.map((option) => (
+                                        {reasonOptions.map((option, index) => (
                                             <button
                                                 key={option.value}
+                                                ref={(el) => { optionRefs.current[index] = el; }}
+                                                id={`reason-option-${index}`}
                                                 type="button"
-                                                onClick={() => {
-                                                    setSelectedReason(option.value);
-                                                    setIsDropdownOpen(false);
-                                                    if (errors.reason) setErrors(prev => ({ ...prev, reason: '' }));
-                                                }}
-                                                className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition-colors duration-200 first:pt-4 last:pb-4"
+                                                role="option"
+                                                aria-selected={selectedReason === option.value}
+                                                onClick={() => selectOption(option.value)}
+                                                onKeyDown={(e) => handleOptionKeyDown(e, index)}
+                                                className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition-colors duration-200 first:pt-4 last:pb-4 focus:outline-none focus:bg-white/10"
                                             >
                                                 {option.label}
                                             </button>

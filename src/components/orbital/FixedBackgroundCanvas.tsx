@@ -139,7 +139,11 @@ export default function FixedBackgroundCanvas() {
                     gl.setClearColor(0x000000, 0);
                 }}
             >
-                <Suspense fallback={null}>
+                <Suspense fallback={
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-32 h-32 rounded-full bg-blue-900/20 animate-pulse blur-2xl" />
+                    </div>
+                }>
                     <SceneWrapper />
                 </Suspense>
             </Canvas>

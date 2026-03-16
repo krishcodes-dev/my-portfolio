@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as THREE from 'three';
+import type { Vector3 } from 'three';
 
 interface ScrollState {
     // The normalized progress of the transition (0 = Hero, 1 = Tech Center)
@@ -17,8 +17,8 @@ interface ScrollState {
     setHoveredTechId: (id: string | null) => void;
 
     // 3D Position Tracking for CSS Overlay
-    nodePositions: Map<string, THREE.Vector3>;
-    updateNodePositions: (positions: Map<string, THREE.Vector3>) => void;
+    nodePositions: Map<string, Vector3>;
+    updateNodePositions: (positions: Map<string, Vector3>) => void;
 }
 
 export const useScrollStore = create<ScrollState>((set) => ({

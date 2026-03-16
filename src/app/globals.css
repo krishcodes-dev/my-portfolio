@@ -16,6 +16,27 @@ body {
   @apply bg-background text-foreground m-0 overflow-x-hidden antialiased;
 }
 
+/* Lenis Recommended Styles */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 ::selection {
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -25,17 +46,48 @@ body {
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
-  background: transparent;
 }
 
-/* Force hide default cursor everywhere */
+html {
+  scrollbar-width: none;
+}
+
+/* Force hide default cursor everywhere (custom cursor system) */
 *,
 *::before,
 *::after {
   cursor: none !important;
 }
 
-/* Re-add star animation */
+/* Keyboard navigation focus indicator */
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-star-anim {
+    animation: none !important;
+  }
+}
+
+/* Boot sequence: rocket ignition shake */
+@keyframes rocketShake {
+  0%   { transform: translate(-2px, -1px) rotate(-0.4deg); }
+  20%  { transform: translate(2px,  1.5px) rotate(0.4deg); }
+  40%  { transform: translate(-1.5px, 1px) rotate(-0.3deg); }
+  60%  { transform: translate(1.5px, -1px) rotate(0.3deg); }
+  80%  { transform: translate(-2px,  1px) rotate(-0.4deg); }
+  100% { transform: translate(2px,  -1.5px) rotate(0.4deg); }
+}
+.rocket-shake {
+  animation: rocketShake 0.07s linear infinite;
+  will-change: transform;
+}
+
+/* Star animation */
 @keyframes animStar {
   from {
     transform: translateY(0px);

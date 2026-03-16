@@ -5,7 +5,8 @@ import {
     SiNextdotjs, SiTypescript, SiTailwindcss, SiFramer, SiGreensock,
     SiFastapi, SiFlask, SiFirebase, SiMongodb, SiSqlite, SiGooglecloud,
     SiScikitlearn, SiPandas, SiEspressif, SiRaspberrypi, SiFlutter, SiThreedotjs,
-    SiJavascript, SiC, SiDart, SiHtml5, SiCss3, SiNumpy, SiDiscord
+    SiJavascript, SiC, SiDart, SiHtml5, SiCss3, SiNumpy, SiDiscord,
+    SiDocker, SiGit, SiLinux, SiPostgresql
 } from "react-icons/si";
 import {
     FaReact, FaNodeJs, FaPython, FaWifi, FaChartLine, FaMicrochip,
@@ -38,6 +39,10 @@ export const iconMap: Record<string, React.ElementType> = {
     gcp: SiGooglecloud,
     node: FaNodeJs,
     java: FaJava,
+    docker: SiDocker,
+    git: SiGit,
+    linux: SiLinux,
+    postgresql: SiPostgresql,
 
     // ML
     python: FaPython,

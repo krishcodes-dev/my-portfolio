@@ -4,20 +4,12 @@ import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useScrollStore } from "@/lib/store";
+import { useIsMobile } from "@/lib/hooks";
 
 export default function Rings3D() {
     const groupRef = useRef<THREE.Group>(null);
     const scrollProgress = useScrollStore((state) => state.scrollProgress);
-    const [isMobile, setIsMobile] = React.useState(false);
-
-    React.useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    const isMobile = useIsMobile();
 
     const ringMats = useRef<THREE.MeshBasicMaterial[]>([]);
     const pointsMat = useRef<THREE.PointsMaterial>(null);
@@ -56,7 +48,7 @@ export default function Rings3D() {
         geo.setAttribute("position", new THREE.BufferAttribute(tempPositions, 3));
         geo.setAttribute("color", new THREE.BufferAttribute(tempColors, 3));
         return geo;
-    }, []);
+    }, [particleCount]);
 
     useFrame((state, delta) => {
         if (!groupRef.current) return;

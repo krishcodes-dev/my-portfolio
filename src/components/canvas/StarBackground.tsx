@@ -1,75 +1,67 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-// Starry background using pure CSS box-shadows
-// Adapted from CodePen: https://codepen.io/saransh/pen/BKJun
 export function StarBackground() {
-    const [shadows, setShadows] = useState({
-        small: '',
-        medium: '',
-        big: '',
-    });
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [reducedMotion, setReducedMotion] = useState(false);
 
     useEffect(() => {
-        // Generate random star coordinates
-        const generateStars = (n: number) => {
-            let value = `${Math.floor(Math.random() * 2000)}px ${Math.floor(Math.random() * 2000)}px #FFF`;
-            for (let i = 2; i <= n; i++) {
-                value += `, ${Math.floor(Math.random() * 2000)}px ${Math.floor(Math.random() * 2000)}px #FFF`;
+        setReducedMotion(
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        );
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const W = 2000;
+        const H = 4000; // double height for seamless scroll loop
+
+        canvas.width = W;
+        canvas.height = H;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const drawStars = (count: number, radius: number, opacity: number) => {
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * W;
+                const y = Math.random() * H;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
             }
-            return value;
         };
 
-        setShadows({
-            small: generateStars(700),
-            medium: generateStars(200),
-            big: generateStars(100),
-        });
+        drawStars(400, 0.6, 0.8);  // small
+        drawStars(120, 1.0, 0.9);  // medium
+        drawStars(60, 1.5, 1.0);   // big
     }, []);
-
-    if (!shadows.small) return null; // Prevent hydration mismatch
 
     return (
         <div className="fixed inset-0 -z-20 overflow-hidden bg-[radial-gradient(ellipse_at_bottom,_#1B2735_0%,_#090A0F_100%)]">
-            {/* Stars Small */}
-            <div
-                className="animate-star-anim absolute w-[1px] h-[1px] bg-transparent after:content-[''] after:absolute after:top-[2000px] after:w-[1px] after:h-[1px] after:bg-transparent"
+            <style>{`
+                @keyframes starScroll {
+                    from { transform: translateY(0); }
+                    to { transform: translateY(-50%); }
+                }
+            `}</style>
+            <canvas
+                ref={canvasRef}
                 style={{
-                    boxShadow: shadows.small,
-                    animationDuration: '50s',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: 'auto',
+                    animation: reducedMotion
+                        ? 'none'
+                        : 'starScroll 120s linear infinite',
+                    imageRendering: 'pixelated',
                 }}
-            >
-                <style jsx>{`
-            .animate-star-anim:after { box-shadow: ${shadows.small}; }
-        `}</style>
-            </div>
-
-            {/* Stars Medium */}
-            <div
-                className="animate-star-anim absolute w-[2px] h-[2px] bg-transparent after:content-[''] after:absolute after:top-[2000px] after:w-[2px] after:h-[2px] after:bg-transparent"
-                style={{
-                    boxShadow: shadows.medium,
-                    animationDuration: '100s',
-                }}
-            >
-                <style jsx>{`
-            .animate-star-anim:after { box-shadow: ${shadows.medium}; }
-        `}</style>
-            </div>
-
-            {/* Stars Big */}
-            <div
-                className="animate-star-anim absolute w-[3px] h-[3px] bg-transparent after:content-[''] after:absolute after:top-[2000px] after:w-[3px] after:h-[3px] after:bg-transparent"
-                style={{
-                    boxShadow: shadows.big,
-                    animationDuration: '150s',
-                }}
-            >
-                <style jsx>{`
-            .animate-star-anim:after { box-shadow: ${shadows.big}; }
-        `}</style>
-            </div>
+            />
         </div>
     );
 }

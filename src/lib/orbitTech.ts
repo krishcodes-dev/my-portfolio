@@ -1,7 +1,7 @@
 export interface OrbitTechItem {
     id: string;
     name: string;
-    category: "frontend" | "backend" | "ml" | "embedded" | "cloud" | "tool";
+    category: "frontend" | "backend" | "ml" | "cloud" | "tool";
     description: string;
     color: string;
 }
@@ -53,13 +53,6 @@ export const orbitTechData: OrbitTechItem[] = [
         color: "#009688",
     },
     {
-        id: "flask",
-        name: "Flask",
-        category: "backend",
-        description: "For when you need an API in 5 lines of code and 30 seconds.",
-        color: "#ffffff",
-    },
-    {
         id: "rest",
         name: "REST APIs",
         category: "backend",
@@ -72,13 +65,6 @@ export const orbitTechData: OrbitTechItem[] = [
         category: "backend",
         description: "Backend-as-a-Service, or as I call it, 'I don't want to manage servers today'.",
         color: "#ffca28",
-    },
-    {
-        id: "sockets",
-        name: "WebSockets",
-        category: "backend",
-        description: "Real-time Magic. Because refreshing the page is so 2010.",
-        color: "#ffffff",
     },
     {
         id: "mongodb",
@@ -125,51 +111,13 @@ export const orbitTechData: OrbitTechItem[] = [
         color: "#150458",
     },
 
-
-    // --- EMBEDDED ---
-    {
-        id: "esp32",
-        name: "ESP32",
-        category: "embedded",
-        description: "Wi-Fi, Bluetooth, and dual cores for the price of a coffee.",
-        color: "#e60023",
-    },
-    {
-        id: "msp430",
-        name: "MSP430",
-        category: "embedded",
-        description: "Ultra-low power. Runs on a potato battery (probably).",
-        color: "#ff0000", // TI Red
-    },
-    {
-        id: "raspberrypi",
-        name: "Raspberry Pi",
-        category: "embedded",
-        description: "The tiny computer that runs my home automation and dust collection service.",
-        color: "#c51a4a",
-    },
-    {
-        id: "rfid",
-        name: "RFID Systems",
-        category: "embedded",
-        description: "Beep. Boop. Access Granted. Magic waves.",
-        color: "#39ff14", // Neon Green
-    },
-
     // --- PROJECT STACK ---
     {
         id: "threejs",
         name: "Three.js / R3F",
         category: "frontend",
-        description: "Bringing the 3rd dimension to the flat web. Spining cubes are life.",
+        description: "Bringing the 3rd dimension to the flat web. Spinning cubes are life.",
         color: "#ffffff",
-    },
-    {
-        id: "zustand",
-        name: "Zustand",
-        category: "tool",
-        description: "Redux without the headache. Global state made simple.",
-        color: "#493828", // Bear color
     },
     // --- CORE LANGUAGES ---
     {
@@ -192,13 +140,6 @@ export const orbitTechData: OrbitTechItem[] = [
         category: "backend",
         description: "Write once, debug everywhere. The enterprise juggernaut.",
         color: "#5382a1",
-    },
-    {
-        id: "c_embedded",
-        name: "C / Embedded C",
-        category: "embedded",
-        description: "Pointers, memory management, and segfaults. The original hardcore mode.",
-        color: "#555555",
     },
     {
         id: "dart",
@@ -255,29 +196,7 @@ export const orbitTechData: OrbitTechItem[] = [
         description: "High-performance arrays. If loops are too slow, vectorizing is the way.",
         color: "#013243",
     },
-    {
-        id: "matplotlib",
-        name: "Matplotlib",
-        category: "ml",
-        description: "Plotting graphs like it's 2003, but it gets the job done.",
-        color: "#11557c",
-    },
 
-    // --- EMBEDDED EXTRAS ---
-    {
-        id: "esp8266",
-        name: "ESP8266",
-        category: "embedded",
-        description: "The OG cheap Wi-Fi chip. Started the revolution.",
-        color: "#607d8b", // Updated to match GPIO/Timers color
-    },
-    {
-        id: "sensors",
-        name: "Sensors & Actuators",
-        category: "embedded",
-        description: "Giving the code eyes, ears, and hands.",
-        color: "#4caf50",
-    },
     {
         id: "gsap",
         name: "GSAP",
@@ -285,4 +204,32 @@ export const orbitTechData: OrbitTechItem[] = [
         description: "Animating the web like a movie director.",
         color: "#88ce02",
     },
+    {
+        id: "postgresql",
+        name: "PostgreSQL",
+        category: "backend",
+        description: "The world's most advanced open source relational database.",
+        color: "#336791",
+    },
+    {
+        id: "docker",
+        name: "Docker",
+        category: "tool",
+        description: "Because 'it works on my machine' is not a deployment strategy.",
+        color: "#2496ed",
+    },
+    {
+        id: "git",
+        name: "Git",
+        category: "tool",
+        description: "Version control for both code and regret.",
+        color: "#f05032",
+    },
+    {
+        id: "linux",
+        name: "Linux",
+        category: "tool",
+        description: "Where everything eventually runs.",
+        color: "#fcc624",
+    }
 ];

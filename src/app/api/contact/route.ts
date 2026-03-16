@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from 'resend';
 
-// Simple in-memory rate limiting (for serverless, use Vercel KV or Redis in production)
+// Simple in-memory rate limiting (NOTE: ineffective on Vercel serverless — each cold
+// start gets its own Map. For production, replace with Upstash Redis + @upstash/ratelimit.)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 function rateLimit(ip: string): boolean {
@@ -21,10 +22,16 @@ function rateLimit(ip: string): boolean {
     return true;
 }
 
+// Properly encodes all HTML special characters to prevent injection in email templates.
 function sanitizeInput(input: string): string {
     return input
         .trim()
-        .replace(/[<>]/g, '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/`/g, '&#x60;')
         .substring(0, 5000);
 }
 
@@ -32,6 +39,15 @@ function isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) && email.length <= 254;
 }
+
+// Must match the options in Contact.tsx reasonOptions
+const VALID_REASONS = [
+    "Job Opportunity",
+    "Project Collaboration",
+    "Freelance Work",
+    "General Question",
+    "Just Saying Hi",
+];
 
 export async function POST(request: Request) {
     try {
@@ -43,7 +59,10 @@ export async function POST(request: Request) {
             );
         }
 
-        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+            || request.headers.get('x-real-ip')
+            || 'unknown';
+
         if (!rateLimit(ip)) {
             return NextResponse.json(
                 { error: "Too many requests. Please try again later." },
@@ -53,6 +72,25 @@ export async function POST(request: Request) {
 
         const body = await request.json();
         const { name, email, message, company, reason, honeypot } = body;
+
+        // Type-check all fields before processing to prevent runtime errors
+        if (
+            typeof name !== 'string' ||
+            typeof email !== 'string' ||
+            typeof message !== 'string' ||
+            typeof reason !== 'string'
+        ) {
+            return NextResponse.json(
+                { error: "Invalid request format" },
+                { status: 400 }
+            );
+        }
+        if (company !== undefined && typeof company !== 'string') {
+            return NextResponse.json(
+                { error: "Invalid request format" },
+                { status: 400 }
+            );
+        }
 
         if (honeypot) {
             console.log('[SECURITY] Honeypot triggered from IP:', ip);
@@ -87,6 +125,14 @@ export async function POST(request: Request) {
             );
         }
 
+        // Server-side allowlist — rejects any reason not in the dropdown
+        if (!VALID_REASONS.includes(reason)) {
+            return NextResponse.json(
+                { error: "Invalid reason selected" },
+                { status: 400 }
+            );
+        }
+
         const sanitizedName = sanitizeInput(name);
         const sanitizedEmail = sanitizeInput(email);
         const sanitizedMessage = sanitizeInput(message);
@@ -96,6 +142,7 @@ export async function POST(request: Request) {
         const resend = new Resend(process.env.RESEND_API_KEY);
 
         const submittedAt = new Date().toLocaleString('en-US', {
+            timeZone: 'Asia/Kolkata',
             weekday: 'short',
             year: 'numeric',
             month: 'short',

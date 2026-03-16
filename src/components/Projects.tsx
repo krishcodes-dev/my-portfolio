@@ -7,8 +7,8 @@ const projects = [
         title: "Asha EHR",
         impact: "A full-stack digital health record system enabling frontline ASHA workers to manage patient data efficiently, even in low-connectivity environments.",
         tech: ["FastAPI", "Firebase", "React / Flutter"],
-        github: "https://github.com/ethancodes-6969/ASHA-EHR",
-        demo: "https://ecodash.demo"
+        github: "https://github.com/ethancodes-6969/ASHA-EHR", // TODO: verify repo exists under krishcodes-dev and update username
+        demo: null // broken link removed — add real demo URL when available
     },
     {
         title: "VerifAI",
@@ -38,7 +38,7 @@ export default function Projects() {
                     viewport={{ once: true }}
                     className="text-4xl md:text-5xl font-bold tracking-tighter mb-4"
                 >
-                    Technical Experience
+                    Projects
                 </motion.h2>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}

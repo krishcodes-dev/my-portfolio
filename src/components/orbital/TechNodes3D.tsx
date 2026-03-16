@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
 import { useScrollStore } from "@/lib/store";
 import { orbitTechData } from "@/lib/orbitTech";
 import { TECH_STACK_ACTIVE_THRESHOLD, TECH_STACK_END_THRESHOLD } from "@/lib/constants";
+import { useIsMobile } from "@/lib/hooks";
 
-function TechOrb({ node, index, isMobile }: { node: any, index: number, isMobile: boolean }) {
+function TechOrb({ node, isMobile }: { node: any, index: number, isMobile: boolean }) {
     const meshRef = useRef<THREE.Mesh>(null);
-    const [hovered, setHovered] = useState(false);
+    const [hovered, setHovered] = React.useState(false);
     const setHoveredTechId = useScrollStore((state) => state.setHoveredTechId);
     const scrollProgress = useScrollStore((state) => state.scrollProgress);
 
@@ -18,7 +19,7 @@ function TechOrb({ node, index, isMobile }: { node: any, index: number, isMobile
         scrollProgress >= TECH_STACK_ACTIVE_THRESHOLD &&
         scrollProgress < TECH_STACK_END_THRESHOLD;
 
-    useFrame((state, delta) => {
+    useFrame((_state, delta) => {
         if (!meshRef.current) return;
         meshRef.current.rotation.y += delta * 0.5;
         meshRef.current.rotation.x += delta * 0.2;
@@ -75,16 +76,17 @@ export default function TechNodes3D() {
     const groupRef = useRef<THREE.Group>(null);
     const scrollProgress = useScrollStore((state) => state.scrollProgress);
     const updateNodePositions = useScrollStore((state) => state.updateNodePositions);
-    const [isMobile, setIsMobile] = React.useState(false);
+    const isMobile = useIsMobile();
 
-    React.useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+    // Pre-allocate one Vector3 per tech to avoid per-frame allocations
+    const vec3Pool = useMemo(() => {
+        const pool = new Map<string, THREE.Vector3>();
+        orbitTechData.forEach(tech => pool.set(tech.id, new THREE.Vector3()));
+        return pool;
     }, []);
+
+    // Frame counter for throttling position updates to every 3rd frame
+    const frameCount = useRef(0);
 
     const nodes = useMemo(() => {
         return orbitTechData.map((tech, i) => {
@@ -110,22 +112,28 @@ export default function TechNodes3D() {
 
         const visibility = THREE.MathUtils.smoothstep(scrollProgress, 0.2, 0.8);
         groupRef.current.scale.setScalar(visibility);
-
         groupRef.current.rotation.y += 0.0005;
 
-        const positions = new Map<string, THREE.Vector3>();
-        const worldPos = new THREE.Vector3();
+        // Throttle expensive position updates to every 3rd frame
+        frameCount.current = (frameCount.current + 1) % 3;
+        if (frameCount.current !== 0) return;
 
+        // Force matrix update specifically here to avoid 1-frame jitter mismatch between React components and Canvas.
+        groupRef.current.updateMatrixWorld(true);
+
+        let hasPositions = false;
         orbitTechData.forEach((tech) => {
             const object = groupRef.current?.getObjectByName(tech.id);
             if (object) {
-                object.getWorldPosition(worldPos);
-                positions.set(tech.id, worldPos.clone());
+                // Write directly into pre-allocated Vector3 — no per-frame allocation
+                object.getWorldPosition(vec3Pool.get(tech.id)!);
+                hasPositions = true;
             }
         });
 
-        if (positions.size > 0) {
-            updateNodePositions(positions);
+        if (hasPositions) {
+            // Shallow-copy the map so Zustand detects the reference change
+            updateNodePositions(new Map(vec3Pool));
         }
     });
 
