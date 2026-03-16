@@ -79,32 +79,34 @@ export default function Navigation() {
     }, []);
 
     const scrollToSection = (id: string) => {
-        // For Tech Stack, use different targets for mobile vs desktop
-        let targetId = id;
         const isMobile = window.innerWidth < 768;
+        let scrollTarget: number | null = null;
 
-        if (id === "techstack") {
-            // Desktop: scroll to techstack-target (orbital interaction point)
-            // Mobile: scroll to techstack (technologies list)
-            targetId = isMobile ? "techstack" : "techstack-target";
+        if (id === "techstack" && !isMobile) {
+            // Desktop: the section is 400vh tall with a GSAP ScrollTrigger
+            // (start:"top bottom" → end:"bottom bottom"). Content only becomes
+            // visible at progress ≥ 0.70, so compute that position directly.
+            const section = document.getElementById("techstack");
+            if (section) {
+                const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+                const triggerStart = sectionTop - window.innerHeight;
+                scrollTarget = triggerStart + 0.70 * section.offsetHeight;
+            }
+        } else {
+            const targetId = id === "techstack" ? "techstack" : id;
+            const element = document.getElementById(targetId);
+            if (element) {
+                const offset = isMobile ? 80 : 0;
+                scrollTarget = element.getBoundingClientRect().top + window.scrollY - offset;
+            }
         }
 
-        const element = document.getElementById(targetId);
-        if (element) {
-            // Calculate offset for mobile (to account for fixed nav)
-            const offset = isMobile ? 80 : 0;
-            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-            const offsetPosition = elementPosition - offset;
+        if (scrollTarget === null) return;
 
-            if ((window as any).lenis) {
-                // Use Lenis smooth scroll
-                (window as any).lenis.scrollTo(offsetPosition);
-            } else {
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
+        if ((window as any).lenis) {
+            (window as any).lenis.scrollTo(scrollTarget);
+        } else {
+            window.scrollTo({ top: scrollTarget, behavior: "smooth" });
         }
     };
 
