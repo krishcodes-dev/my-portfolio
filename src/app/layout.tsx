@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "@/styles/cursor.css";
 import SmoothScroll from "@/components/providers/smooth-scroll";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BootSequence } from "@/components/ui/BootSequence";

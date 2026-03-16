@@ -52,12 +52,6 @@ html {
   scrollbar-width: none;
 }
 
-/* Force hide default cursor everywhere (custom cursor system) */
-*,
-*::before,
-*::after {
-  cursor: none !important;
-}
 
 /* Keyboard navigation focus indicator */
 :focus-visible {
